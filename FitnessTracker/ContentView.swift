@@ -8,6 +8,13 @@
 import SwiftUI
 import SwiftData
 
+// Funkcja pomocnicza do formatowania minut w formacie xx:xx
+func formatMinutes(_ minutes: Double) -> String {
+    let hours = Int(minutes) / 60
+    let mins = Int(minutes) % 60
+    return String(format: "%02d:%02d", hours, mins)
+}
+
 struct ContentView: View {
     @State private var workouts: [TreadmillWorkout] = []
     @State private var showingAddWorkout = false
@@ -53,17 +60,17 @@ struct WorkoutRow: View {
             Text(workout.date.formatted(date: .abbreviated, time: .shortened))
                 .font(.headline)
             HStack {
-                Text("Total: \(Int(workout.totalDuration))min")
+                Text("Total: \(formatMinutes(workout.totalDuration))")
                 Spacer()
                 Text(String(format: "%.1f km/h", workout.totalSpeed))
             }
             HStack {
-                Text("Running: \(Int(workout.runningDuration))min")
+                Text("Running: \(formatMinutes(workout.runningDuration))")
                 Spacer()
                 Text(String(format: "%.1f km/h", workout.runningSpeed))
             }
             HStack {
-                Text("Walking: \(Int(workout.walkingDuration))min")
+                Text("Walking: \(formatMinutes(workout.walkingDuration))")
             }
         }
         .padding(.vertical, 8)
@@ -90,6 +97,7 @@ struct WorkoutForm: View {
                         TextField("Duration", value: $totalDuration, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
                     }
                     HStack {
                         Text("Speed (km/h)")
@@ -97,6 +105,7 @@ struct WorkoutForm: View {
                         TextField("Speed", value: $totalSpeed, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
                     }
                 }
                 
@@ -107,6 +116,7 @@ struct WorkoutForm: View {
                         TextField("Duration", value: $runningDuration, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
                     }
                     HStack {
                         Text("Speed (km/h)")
@@ -114,11 +124,12 @@ struct WorkoutForm: View {
                         TextField("Speed", value: $runningSpeed, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
                     }
                 }
                 
                 Section {
-                    Button("Save") {
+                    Button(action: {
                         let workout = TreadmillWorkout(
                             date: editingWorkout?.date ?? Date(),
                             totalDuration: totalDuration,
@@ -133,12 +144,14 @@ struct WorkoutForm: View {
                             workouts.append(workout)
                         }
                         dismiss()
+                    }) {
+                        Text("Save")
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
                     }
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(10)
                 }
             }
             .navigationTitle(editingWorkout == nil ? "New Workout" : "Edit Workout")

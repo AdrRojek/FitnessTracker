@@ -16,23 +16,3 @@ final class Item {
         self.timestamp = timestamp
     }
 }
-
-struct TreadmillWorkout: Identifiable, Codable {
-    var id = UUID()
-    var date: Date
-    var totalDuration: TimeInterval // w minutach
-    var totalSpeed: Double // km/h
-    var runningDuration: TimeInterval // w minutach
-    var runningSpeed: Double // km/h
-    
-    var walkingDuration: TimeInterval {
-        totalDuration - runningDuration
-    }
-    
-    var walkingSpeed: Double {
-        let totalDistance = (totalDuration / 60) * totalSpeed
-        let runningDistance = (runningDuration / 60) * runningSpeed
-        let walkingDistance = totalDistance - runningDistance
-        return walkingDistance / (walkingDuration / 60)
-    }
-}
