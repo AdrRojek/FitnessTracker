@@ -16,7 +16,15 @@ func formatMinutes(_ minutes: Double) -> String {
 }
 
 struct ContentView: View {
-    @State private var workouts: [TreadmillWorkout] = []
+    @State private var workouts: [TreadmillWorkout] = [
+        TreadmillWorkout(
+            date: Date(),
+            totalDuration: 45,
+            totalSpeed: 6.5,
+            runningDuration: 15,
+            runningSpeed: 10.0
+        )
+    ]
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
     @State private var showingEditSheet = false
