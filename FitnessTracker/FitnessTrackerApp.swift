@@ -12,17 +12,12 @@ struct TreadmillWorkout: Identifiable, Codable {
     var id = UUID()
     var date: Date
     var totalDuration: Double // w minutach
-    var totalSpeed: Double // km/h
+    var walkingSpeed: Double // km/h (prędkość chodu)
     var runningDuration: Double // w minutach
     var runningSpeed: Double // km/h
     
     var walkingDuration: Double {
         totalDuration - runningDuration
-    }
-    
-    // Obliczanie przebytego dystansu w kilometrach
-    var totalDistance: Double {
-        (totalDuration / 60) * totalSpeed
     }
     
     // Obliczanie dystansu biegu w kilometrach
@@ -32,7 +27,12 @@ struct TreadmillWorkout: Identifiable, Codable {
     
     // Obliczanie dystansu chodu w kilometrach
     var walkingDistance: Double {
-        totalDistance - runningDistance
+        (walkingDuration / 60) * walkingSpeed
+    }
+    
+    // Obliczanie całkowitego dystansu w kilometrach
+    var totalDistance: Double {
+        runningDistance + walkingDistance
     }
     
     // Szacowanie spalonych kalorii (przykładowy wzór)
@@ -42,15 +42,10 @@ struct TreadmillWorkout: Identifiable, Codable {
         return runningCalories + walkingCalories
     }
     
-    // Obliczanie średniej prędkości biegu
-    var averageRunningSpeed: Double {
-        runningSpeed
-    }
-    
-    // Obliczanie średniej prędkości chodu
-    var walkingSpeed: Double {
-        if walkingDuration > 0 {
-            return (walkingDistance / (walkingDuration / 60))
+    // Obliczanie średniej prędkości całkowitej
+    var averageSpeed: Double {
+        if totalDuration > 0 {
+            return totalDistance / (totalDuration / 60)
         }
         return 0
     }

@@ -20,7 +20,7 @@ struct ContentView: View {
         TreadmillWorkout(
             date: Date(),
             totalDuration: 45,
-            totalSpeed: 6.5,
+            walkingSpeed: 5.0,
             runningDuration: 15,
             runningSpeed: 10.0
         )
@@ -70,7 +70,7 @@ struct WorkoutRow: View {
             HStack {
                 Text("Total: \(formatMinutes(workout.totalDuration))")
                 Spacer()
-                Text(String(format: "%.1f km/h", workout.totalSpeed))
+                Text(String(format: "%.1f km/h", workout.averageSpeed))
             }
             HStack {
                 Text("Running: \(formatMinutes(workout.runningDuration))")
@@ -134,9 +134,9 @@ struct WorkoutDetails: View {
                 
                 Section(header: Text("Speed")) {
                     HStack {
-                        Text("Total")
+                        Text("Average")
                         Spacer()
-                        Text(String(format: "%.1f km/h", workout.totalSpeed))
+                        Text(String(format: "%.1f km/h", workout.averageSpeed))
                     }
                     HStack {
                         Text("Running")
@@ -175,7 +175,7 @@ struct WorkoutForm: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var totalDuration: Double = 0
-    @State private var totalSpeed: Double = 0
+    @State private var walkingSpeed: Double = 0
     @State private var runningDuration: Double = 0
     @State private var runningSpeed: Double = 0
     
@@ -191,10 +191,13 @@ struct WorkoutForm: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
                     }
+                }
+                
+                Section(header: Text("Walking")) {
                     HStack {
                         Text("Speed (km/h)")
                         Spacer()
-                        TextField("Speed", value: $totalSpeed, format: .number)
+                        TextField("Speed", value: $walkingSpeed, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
@@ -225,7 +228,7 @@ struct WorkoutForm: View {
                         let workout = TreadmillWorkout(
                             date: Date(),
                             totalDuration: totalDuration,
-                            totalSpeed: totalSpeed,
+                            walkingSpeed: walkingSpeed,
                             runningDuration: runningDuration,
                             runningSpeed: runningSpeed
                         )
