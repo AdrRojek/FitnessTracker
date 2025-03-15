@@ -64,8 +64,6 @@ struct WorkoutRow: View {
             }
             HStack {
                 Text("Walking: \(Int(workout.walkingDuration))min")
-                Spacer()
-                Text(String(format: "%.1f km/h", workout.walkingSpeed))
             }
         }
         .padding(.vertical, 8)
