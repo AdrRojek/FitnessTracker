@@ -27,7 +27,7 @@ struct ContentView: View {
     ]
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
-    @State private var showingEditSheet = false
+    @State private var showingDetailsSheet = false
     
     var body: some View {
         NavigationView {
@@ -36,7 +36,7 @@ struct ContentView: View {
                     WorkoutRow(workout: workout)
                         .onTapGesture {
                             selectedWorkout = workout
-                            showingEditSheet = true
+                            showingDetailsSheet = true
                         }
                 }
             }
@@ -51,9 +51,9 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddWorkout) {
                 WorkoutForm(workouts: $workouts)
             }
-            .sheet(isPresented: $showingEditSheet) {
+            .sheet(isPresented: $showingDetailsSheet) {
                 if let workout = selectedWorkout {
-                    WorkoutForm(workouts: $workouts, editingWorkout: workout)
+                    WorkoutDetails(workout: workout)
                 }
             }
         }
@@ -85,10 +85,94 @@ struct WorkoutRow: View {
     }
 }
 
+struct WorkoutDetails: View {
+    let workout: TreadmillWorkout
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section(header: Text("Date")) {
+                    Text(workout.date.formatted(date: .long, time: .shortened))
+                }
+                
+                Section(header: Text("Duration")) {
+                    HStack {
+                        Text("Total")
+                        Spacer()
+                        Text(formatMinutes(workout.totalDuration))
+                    }
+                    HStack {
+                        Text("Running")
+                        Spacer()
+                        Text(formatMinutes(workout.runningDuration))
+                    }
+                    HStack {
+                        Text("Walking")
+                        Spacer()
+                        Text(formatMinutes(workout.walkingDuration))
+                    }
+                }
+                
+                Section(header: Text("Distance")) {
+                    HStack {
+                        Text("Total")
+                        Spacer()
+                        Text(String(format: "%.2f km", workout.totalDistance))
+                    }
+                    HStack {
+                        Text("Running")
+                        Spacer()
+                        Text(String(format: "%.2f km", workout.runningDistance))
+                    }
+                    HStack {
+                        Text("Walking")
+                        Spacer()
+                        Text(String(format: "%.2f km", workout.walkingDistance))
+                    }
+                }
+                
+                Section(header: Text("Speed")) {
+                    HStack {
+                        Text("Total")
+                        Spacer()
+                        Text(String(format: "%.1f km/h", workout.totalSpeed))
+                    }
+                    HStack {
+                        Text("Running")
+                        Spacer()
+                        Text(String(format: "%.1f km/h", workout.runningSpeed))
+                    }
+                    HStack {
+                        Text("Walking")
+                        Spacer()
+                        Text(String(format: "%.1f km/h", workout.walkingSpeed))
+                    }
+                }
+                
+                Section(header: Text("Calories")) {
+                    HStack {
+                        Text("Burned")
+                        Spacer()
+                        Text(String(format: "%.0f kcal", workout.caloriesBurned))
+                    }
+                }
+            }
+            .navigationTitle("Workout Details")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
 struct WorkoutForm: View {
     @Binding var workouts: [TreadmillWorkout]
     @Environment(\.dismiss) var dismiss
-    var editingWorkout: TreadmillWorkout?
     
     @State private var totalDuration: Double = 0
     @State private var totalSpeed: Double = 0
@@ -139,18 +223,13 @@ struct WorkoutForm: View {
                 Section {
                     Button(action: {
                         let workout = TreadmillWorkout(
-                            date: editingWorkout?.date ?? Date(),
+                            date: Date(),
                             totalDuration: totalDuration,
                             totalSpeed: totalSpeed,
                             runningDuration: runningDuration,
                             runningSpeed: runningSpeed
                         )
-                        
-                        if let index = workouts.firstIndex(where: { $0.id == editingWorkout?.id }) {
-                            workouts[index] = workout
-                        } else {
-                            workouts.append(workout)
-                        }
+                        workouts.append(workout)
                         dismiss()
                     }) {
                         Text("Save")
@@ -162,20 +241,12 @@ struct WorkoutForm: View {
                     }
                 }
             }
-            .navigationTitle(editingWorkout == nil ? "New Workout" : "Edit Workout")
+            .navigationTitle("New Workout")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                }
-            }
-            .onAppear {
-                if let workout = editingWorkout {
-                    totalDuration = workout.totalDuration
-                    totalSpeed = workout.totalSpeed
-                    runningDuration = workout.runningDuration
-                    runningSpeed = workout.runningSpeed
                 }
             }
         }
