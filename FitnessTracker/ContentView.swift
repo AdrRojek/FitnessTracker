@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  FitnessTracker
-//
-//  Created by adrian on 15/03/2025.
-//
-
 import SwiftUI
 import SwiftData
 
