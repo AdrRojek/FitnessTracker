@@ -32,54 +32,77 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(sortedWorkouts) { workout in
-                    WorkoutRow(workout: workout, userProfile: userProfile)
-                        .onTapGesture {
-                            selectedWorkout = workout
-                            showingDetailsSheet = true
+        TabView {
+            // Ekran główny
+            NavigationView {
+                Text("Home Screen")
+                    .navigationTitle("Home")
+            }
+            .tabItem {
+                Image(systemName: "house.fill")
+                Text("Home")
+            }
+            
+            // Ekran z treningami
+            NavigationView {
+                List {
+                    ForEach(sortedWorkouts) { workout in
+                        WorkoutRow(workout: workout, userProfile: userProfile)
+                            .onTapGesture {
+                                selectedWorkout = workout
+                                showingDetailsSheet = true
+                            }
+                    }
+                }
+                .navigationTitle("Workouts")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            showingAddWorkout = true
+                        }) {
+                            Image(systemName: "plus")
                         }
-                }
-            }
-            .navigationTitle("Treadmill Workouts")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        showingProfileSheet = true
-                    }) {
-                        Image(systemName: "person.circle.fill")
-                            .font(.title2)
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingAddWorkout = true
-                    }) {
-                        Image(systemName: "plus")
+                .sheet(isPresented: $showingAddWorkout) {
+                    WorkoutForm(workouts: $workouts)
+                }
+                .sheet(isPresented: $showingDetailsSheet) {
+                    if let workout = selectedWorkout {
+                        WorkoutDetails(workout: workout, userProfile: userProfile)
                     }
                 }
             }
-            .sheet(isPresented: $showingAddWorkout) {
-                WorkoutForm(workouts: $workouts)
+            .tabItem {
+                Image(systemName: "figure.run")
+                Text("Workouts")
             }
-            .sheet(isPresented: $showingDetailsSheet) {
-                if let workout = selectedWorkout {
-                    WorkoutDetails(workout: workout, userProfile: userProfile)
-                }
+            
+            // Ekran postępów wagi
+            NavigationView {
+                Text("Weight Progress")
+                    .navigationTitle("Weight")
             }
-            .sheet(isPresented: $showingProfileSheet) {
+            .tabItem {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                Text("Weight")
+            }
+            
+            // Ekran profilu
+            NavigationView {
                 UserProfileView(profile: $userProfile)
             }
-            .onAppear {
-                if let profile = userProfiles.first {
-                    userProfile = profile
-                    print("Profile loaded: \(profile.weight) kg, \(profile.height) cm, \(profile.gender)")
-                }
+            .tabItem {
+                Image(systemName: "person.fill")
+                Text("Profile")
             }
         }
-        .environment(\.modelContext, modelContext)
+        .onAppear {
+            if let profile = userProfiles.first {
+                userProfile = profile
+                print("Profile loaded: \(profile.weight) kg, \(profile.height) cm, \(profile.gender)")
+            }
+        }
     }
 }
 
