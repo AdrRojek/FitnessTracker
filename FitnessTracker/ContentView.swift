@@ -442,8 +442,9 @@ struct WeightProgressView: View {
                     }
                 }
             }
+            .frame(maxWidth: 200, maxHeight: 200)
         }
-        .sheet(isPresented: $showingEditSheet) {
+        .popover(isPresented: $showingEditSheet) {
             if let measurement = selectedMeasurement {
                 NavigationView {
                     Form {
@@ -467,6 +468,7 @@ struct WeightProgressView: View {
                         }
                     }
                 }
+                .frame(maxWidth: 200, maxHeight: 200)
             }
         }
         .onAppear {
