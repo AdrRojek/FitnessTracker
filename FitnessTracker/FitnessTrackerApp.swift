@@ -66,9 +66,20 @@ struct TreadmillWorkout: Identifiable, Codable {
 
 @main
 struct FitnessTrackerApp: App {
+    let container: ModelContainer
+    
+    init() {
+        do {
+            container = try ModelContainer(for: UserProfile.self)
+        } catch {
+            fatalError("Could not initialize ModelContainer")
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(container)
     }
 }
