@@ -60,7 +60,7 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingDetailsSheet) {
                 if let workout = selectedWorkout {
-                    WorkoutDetails(workout: workout)
+                    WorkoutDetails(workout: workout, userProfile: userProfile)
                 }
             }
             .sheet(isPresented: $showingProfileSheet) {
@@ -97,6 +97,7 @@ struct WorkoutRow: View {
 
 struct WorkoutDetails: View {
     let workout: TreadmillWorkout
+    let userProfile: UserProfile
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -164,7 +165,7 @@ struct WorkoutDetails: View {
                     HStack {
                         Text("Burned")
                         Spacer()
-                        Text(String(format: "%.0f kcal", workout.caloriesBurned))
+                        Text(String(format: "%.0f kcal", workout.calculateCaloriesBurned(userProfile: userProfile)))
                     }
                 }
             }
