@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftData
 
-// Funkcja pomocnicza do formatowania minut w formacie xx:xx
 func formatMinutes(_ minutes: Double) -> String {
     let hours = Int(minutes) / 60
     let mins = Int(minutes) % 60
