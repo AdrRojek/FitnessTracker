@@ -361,6 +361,8 @@ struct WeightProgressView: View {
     @State private var selectedMeasurement: WeightMeasurement?
     @State private var showingEditSheet = false
     @State private var editedWeight: Double = 0
+    @State private var showingDeleteConfirmation = false
+    @State private var measurementToDelete: WeightMeasurement?
     
     var body: some View {
         VStack {
@@ -397,10 +399,69 @@ struct WeightProgressView: View {
                         }) {
                             Image(systemName: "pencil")
                         }
+                        .popover(isPresented: $showingEditSheet) {
+                            if let measurement = selectedMeasurement {
+                                VStack(spacing: 16) {
+                                    Text("Edit Weight")
+                                        .font(.headline)
+                                    
+                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .padding(.horizontal)
+                                    
+                                    HStack(spacing: 20) {
+                                        Button("Cancel") {
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.bordered)
+                                        
+                                        Button("Save") {
+                                            measurement.weight = editedWeight
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                    }
+                                }
+                                .padding()
+                                .frame(width: 200, height: 150)
+                                .presentationCompactAdaptation(.popover)
+                            }
+                        }
+                        
                         Button(action: {
-                            modelContext.delete(measurement)
+                            measurementToDelete = measurement
+                            showingDeleteConfirmation = true
                         }) {
                             Image(systemName: "trash")
+                        }
+                        .popover(isPresented: $showingDeleteConfirmation) {
+                            if let measurement = measurementToDelete {
+                                VStack(spacing: 16) {
+                                    Text("Delete Weight")
+                                        .font(.headline)
+                                    
+                                    Text("Are you sure you want to delete this measurement?")
+                                        .multilineTextAlignment(.center)
+                                    
+                                    HStack(spacing: 20) {
+                                        Button("Cancel") {
+                                            showingDeleteConfirmation = false
+                                        }
+                                        .buttonStyle(.bordered)
+                                        
+                                        Button("Delete") {
+                                            modelContext.delete(measurement)
+                                            showingDeleteConfirmation = false
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(.red)
+                                    }
+                                }
+                                .padding()
+                                .frame(width: 200, height: 150)
+                                .presentationCompactAdaptation(.popover)
+                            }
                         }
                     }
                 }
@@ -414,61 +475,36 @@ struct WeightProgressView: View {
                 }) {
                     Image(systemName: "plus")
                 }
-            }
-        }
-        .popover(isPresented: $showingAddWeight) {
-            NavigationView {
-                Form {
-                    Section(header: Text("New Weight")) {
+                .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
+                    VStack(spacing: 16) {
+                        Text("New Weight")
+                            .font(.headline)
+                        
                         TextField("Weight (kg)", value: $newWeight, format: .number)
                             .keyboardType(.decimalPad)
-                    }
-                }
-                .navigationTitle("Add Weight")
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            let measurement = WeightMeasurement(weight: newWeight)
-                            modelContext.insert(measurement)
-                            showingAddWeight = false
-                            newWeight = 0
-                            isAnimating = true
-                        }
-                    }
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            showingAddWeight = false
-                        }
-                    }
-                }
-            }
-            .frame(maxWidth: 200, maxHeight: 200)
-        }
-        .popover(isPresented: $showingEditSheet) {
-            if let measurement = selectedMeasurement {
-                NavigationView {
-                    Form {
-                        Section(header: Text("Edit Weight")) {
-                            TextField("Weight (kg)", value: $editedWeight, format: .number)
-                                .keyboardType(.decimalPad)
-                        }
-                    }
-                    .navigationTitle("Edit Weight")
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Save") {
-                                measurement.weight = editedWeight
-                                showingEditSheet = false
-                            }
-                        }
-                        ToolbarItem(placement: .cancellationAction) {
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                        
+                        HStack(spacing: 20) {
                             Button("Cancel") {
-                                showingEditSheet = false
+                                showingAddWeight = false
                             }
+                            .buttonStyle(.bordered)
+                            
+                            Button("Save") {
+                                let measurement = WeightMeasurement(weight: newWeight)
+                                modelContext.insert(measurement)
+                                showingAddWeight = false
+                                newWeight = 0
+                                isAnimating = true
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
                     }
+                    .padding()
+                    .frame(width: 200, height: 150)
+                    .presentationCompactAdaptation(.popover)
                 }
-                .frame(maxWidth: 200, maxHeight: 200)
             }
         }
         .onAppear {
