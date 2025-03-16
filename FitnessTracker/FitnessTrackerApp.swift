@@ -13,12 +13,10 @@ struct TreadmillWorkout: Identifiable, Codable {
         totalDuration - runningDuration
     }
     
-    // Obliczanie dystansu biegu w kilometrach
     var runningDistance: Double {
         (runningDuration / 60) * runningSpeed
     }
     
-    // Obliczanie dystansu chodu w kilometrach
     var walkingDistance: Double {
         (walkingDuration / 60) * walkingSpeed
     }
