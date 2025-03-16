@@ -53,14 +53,14 @@ struct TreadmillWorkout: Identifiable, Codable {
     
     // Obliczanie współczynnika MET dla biegu
     private func calculateRunningMET(speed: Double) -> Double {
-        // Wzór przybliżony na podstawie badań
-        return 0.2 * speed + 1.8
+        // MET = 0.5 * speed + 3.0
+        return 0.5 * speed + 3.0
     }
     
     // Obliczanie współczynnika MET dla chodu
     private func calculateWalkingMET(speed: Double) -> Double {
-        // Wzór przybliżony na podstawie badań
-        return 0.1 * speed + 2.0
+        // MET = 0.3 * speed + 2.5
+        return 0.3 * speed + 2.5
     }
 }
 

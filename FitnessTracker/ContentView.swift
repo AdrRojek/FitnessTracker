@@ -93,9 +93,6 @@ struct WorkoutRow: View {
                 Spacer()
                 Text(String(format: "%.1f km/h", workout.walkingSpeed))
             }
-            HStack {
-                Text("Average: \(String(format: "%.1f km/h", workout.averageSpeed))")
-            }
         }
         .padding(.vertical, 8)
     }
