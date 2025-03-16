@@ -31,7 +31,6 @@ struct TreadmillWorkout: Identifiable, Codable {
         return runningCalories + walkingCalories
     }
     
-    // Obliczanie średniej prędkości całkowitej
     var averageSpeed: Double {
         if totalDuration > 0 {
             return totalDistance / (totalDuration / 60)
