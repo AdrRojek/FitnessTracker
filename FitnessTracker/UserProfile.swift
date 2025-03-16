@@ -1,13 +1,21 @@
-import Foundation
+import SwiftUI
+import SwiftData
 
-struct UserProfile: Codable {
+@Model
+class UserProfile {
     var weight: Double // w kg
     var height: Double // w cm
     var gender: Gender
     
-    enum Gender: String, Codable, CaseIterable {
-        case male = "Male"
-        case female = "Female"
-        case other = "Other"
+    enum Gender: String, Codable {
+        case male
+        case female
+        case other
+    }
+    
+    init(weight: Double = 70, height: Double = 175, gender: Gender = .male) {
+        self.weight = weight
+        self.height = height
+        self.gender = gender
     }
 } 

@@ -24,11 +24,17 @@ struct ContentView: View {
     @State private var showingDetailsSheet = false
     @State private var showingProfileSheet = false
     @State private var userProfile = UserProfile(weight: 70, height: 175, gender: .male)
+    @Environment(\.modelContext) private var modelContext
+    @Query private var userProfiles: [UserProfile]
+    
+    private var sortedWorkouts: [TreadmillWorkout] {
+        workouts.sorted(by: { $0.date > $1.date })
+    }
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(workouts.sorted(by: { $0.date > $1.date })) { workout in
+                ForEach(sortedWorkouts) { workout in
                     WorkoutRow(workout: workout, userProfile: userProfile)
                         .onTapGesture {
                             selectedWorkout = workout
@@ -66,7 +72,14 @@ struct ContentView: View {
             .sheet(isPresented: $showingProfileSheet) {
                 UserProfileView(profile: $userProfile)
             }
+            .onAppear {
+                if let profile = userProfiles.first {
+                    userProfile = profile
+                    print("Profile loaded: \(profile.weight) kg, \(profile.height) cm, \(profile.gender)")
+                }
+            }
         }
+        .environment(\.modelContext, modelContext)
     }
 }
 
@@ -277,54 +290,35 @@ struct WorkoutForm: View {
 
 struct UserProfileView: View {
     @Binding var profile: UserProfile
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Personal Information")) {
-                    HStack {
-                        Text("Weight")
-                        Spacer()
-                        TextField("Weight", value: $profile.weight, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                        Text("kg")
-                    }
-                    
-                    HStack {
-                        Text("Height")
-                        Spacer()
-                        TextField("Height", value: $profile.height, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                        Text("cm")
-                    }
-                    
-                    Picker("Gender", selection: $profile.gender) {
-                        ForEach(UserProfile.Gender.allCases, id: \.self) { gender in
-                            Text(gender.rawValue).tag(gender)
-                        }
-                    }
+                Section(header: Text("Weight")) {
+                    TextField("Weight (kg)", value: $profile.weight, format: .number)
                 }
-                
-                Section {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Text("Save")
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                Section(header: Text("Height")) {
+                    TextField("Height (cm)", value: $profile.height, format: .number)
+                }
+                Section(header: Text("Gender")) {
+                    Picker("Gender", selection: $profile.gender) {
+                        Text("Male").tag(UserProfile.Gender.male)
+                        Text("Female").tag(UserProfile.Gender.female)
+                        Text("Other").tag(UserProfile.Gender.other)
                     }
                 }
             }
             .navigationTitle("User Profile")
             .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        modelContext.insert(profile)
+                        print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender)")
+                        dismiss()
+                    }
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
@@ -332,6 +326,7 @@ struct UserProfileView: View {
                 }
             }
         }
+        .environment(\.modelContext, modelContext)
     }
 }
 
