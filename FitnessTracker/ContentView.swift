@@ -397,35 +397,6 @@ struct WeightProgressView: View {
                         }) {
                             Image(systemName: "pencil")
                         }
-                        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
-                            if let measurement = selectedMeasurement {
-                                VStack(spacing: 16) {
-                                    Text("Edit Weight")
-                                        .font(.headline)
-                                    
-                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .padding(.horizontal)
-                                    
-                                    HStack(spacing: 20) {
-                                        Button("Cancel") {
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.bordered)
-                                        
-                                        Button("Save") {
-                                            measurement.weight = editedWeight
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.borderedProminent)
-                                    }
-                                }
-                                .padding()
-                                .frame(width: 200, height: 150)
-                                .presentationCompactAdaptation(.popover)
-                            }
-                        }
                     }
                 }
             }
@@ -468,6 +439,35 @@ struct WeightProgressView: View {
                     .frame(width: 200, height: 150)
                     .presentationCompactAdaptation(.popover)
                 }
+            }
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            if let measurement = selectedMeasurement {
+                VStack(spacing: 16) {
+                    Text("Edit Weight")
+                        .font(.headline)
+                    
+                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    HStack(spacing: 20) {
+                        Button("Cancel") {
+                            showingEditSheet = false
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Save") {
+                            measurement.weight = editedWeight
+                            showingEditSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+                .frame(width: 200, height: 150)
+                .presentationCompactAdaptation(.popover)
             }
         }
         .onAppear {
