@@ -174,6 +174,7 @@ struct WorkoutForm: View {
     @Binding var workouts: [TreadmillWorkout]
     @Environment(\.dismiss) var dismiss
     
+    @State private var selectedDate = Date()
     @State private var totalDuration: Double = 0
     @State private var walkingSpeed: Double = 0
     @State private var runningDuration: Double = 0
@@ -182,6 +183,10 @@ struct WorkoutForm: View {
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("Date")) {
+                    DatePicker("Select Date", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                }
+                
                 Section(header: Text("Total Workout")) {
                     HStack {
                         Text("Duration (minutes)")
@@ -226,7 +231,7 @@ struct WorkoutForm: View {
                 Section {
                     Button(action: {
                         let workout = TreadmillWorkout(
-                            date: Date(),
+                            date: selectedDate,
                             totalDuration: totalDuration,
                             walkingSpeed: walkingSpeed,
                             runningDuration: runningDuration,
