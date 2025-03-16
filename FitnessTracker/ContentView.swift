@@ -361,11 +361,9 @@ struct WeightProgressView: View {
     @State private var selectedMeasurement: WeightMeasurement?
     @State private var showingEditSheet = false
     @State private var editedWeight: Double = 0
-    @State private var showingDeleteConfirmation = false
-    @State private var measurementToDelete: WeightMeasurement?
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Chart {
                 ForEach(measurements.sorted(by: { $0.date < $1.date })) { measurement in
                     LineMark(
@@ -398,70 +396,6 @@ struct WeightProgressView: View {
                             showingEditSheet = true
                         }) {
                             Image(systemName: "pencil")
-                        }
-                        .popover(isPresented: $showingEditSheet) {
-                            if let measurement = selectedMeasurement {
-                                VStack(spacing: 16) {
-                                    Text("Edit Weight")
-                                        .font(.headline)
-                                    
-                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .padding(.horizontal)
-                                    
-                                    HStack(spacing: 20) {
-                                        Button("Cancel") {
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.bordered)
-                                        
-                                        Button("Save") {
-                                            measurement.weight = editedWeight
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.borderedProminent)
-                                    }
-                                }
-                                .padding()
-                                .frame(width: 200, height: 150)
-                                .presentationCompactAdaptation(.popover)
-                            }
-                        }
-                        
-                        Button(action: {
-                            measurementToDelete = measurement
-                            showingDeleteConfirmation = true
-                        }) {
-                            Image(systemName: "trash")
-                        }
-                        .popover(isPresented: $showingDeleteConfirmation) {
-                            if let measurement = measurementToDelete {
-                                VStack(spacing: 16) {
-                                    Text("Delete Weight")
-                                        .font(.headline)
-                                    
-                                    Text("Are you sure you want to delete this measurement?")
-                                        .multilineTextAlignment(.center)
-                                    
-                                    HStack(spacing: 20) {
-                                        Button("Cancel") {
-                                            showingDeleteConfirmation = false
-                                        }
-                                        .buttonStyle(.bordered)
-                                        
-                                        Button("Delete") {
-                                            modelContext.delete(measurement)
-                                            showingDeleteConfirmation = false
-                                        }
-                                        .buttonStyle(.borderedProminent)
-                                        .tint(.red)
-                                    }
-                                }
-                                .padding()
-                                .frame(width: 200, height: 150)
-                                .presentationCompactAdaptation(.popover)
-                            }
                         }
                     }
                 }
@@ -505,6 +439,35 @@ struct WeightProgressView: View {
                     .frame(width: 200, height: 150)
                     .presentationCompactAdaptation(.popover)
                 }
+            }
+        }
+        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
+            if let measurement = selectedMeasurement {
+                VStack(spacing: 16) {
+                    Text("Edit Weight")
+                        .font(.headline)
+                    
+                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    HStack(spacing: 20) {
+                        Button("Cancel") {
+                            showingEditSheet = false
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Save") {
+                            measurement.weight = editedWeight
+                            showingEditSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+                .frame(width: 200, height: 150)
+                .presentationCompactAdaptation(.popover)
             }
         }
         .onAppear {
