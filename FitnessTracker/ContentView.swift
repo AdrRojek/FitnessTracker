@@ -2,9 +2,11 @@ import SwiftUI
 import SwiftData
 
 func formatMinutes(_ minutes: Double) -> String {
-    let hours = Int(minutes) / 60
-    let mins = Int(minutes) % 60
-    return String(format: "%02d:%02d", hours, mins)
+    let totalSeconds = Int(minutes * 60)
+    let hours = totalSeconds / 3600
+    let minutes = (totalSeconds % 3600) / 60
+    let seconds = totalSeconds % 60
+    return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
 }
 
 struct ContentView: View {
