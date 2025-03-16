@@ -350,11 +350,6 @@ struct UserProfileView: View {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
             }
         }
         .environment(\.modelContext, modelContext)
