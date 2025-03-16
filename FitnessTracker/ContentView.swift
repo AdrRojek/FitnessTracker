@@ -357,6 +357,10 @@ struct WeightProgressView: View {
     @Query private var measurements: [WeightMeasurement]
     @State private var showingAddWeight = false
     @State private var newWeight: Double = 0
+    @State private var isAnimating = false
+    @State private var selectedMeasurement: WeightMeasurement?
+    @State private var showingEditSheet = false
+    @State private var editedWeight: Double = 0
     
     var body: some View {
         VStack {
@@ -377,13 +381,27 @@ struct WeightProgressView: View {
             }
             .frame(height: 200)
             .padding()
+            .opacity(isAnimating ? 1 : 0)
+            .animation(.easeIn(duration: 1), value: isAnimating)
             
             List {
                 ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
                     HStack {
-                        Text(measurement.date.formatted(date: .abbreviated, time: .omitted))
+                        Text(measurement.date.formatted(date: .abbreviated, time: .shortened))
                         Spacer()
                         Text(String(format: "%.1f kg", measurement.weight))
+                        Button(action: {
+                            selectedMeasurement = measurement
+                            editedWeight = measurement.weight
+                            showingEditSheet = true
+                        }) {
+                            Image(systemName: "pencil")
+                        }
+                        Button(action: {
+                            modelContext.delete(measurement)
+                        }) {
+                            Image(systemName: "trash")
+                        }
                     }
                 }
             }
@@ -414,6 +432,7 @@ struct WeightProgressView: View {
                             modelContext.insert(measurement)
                             showingAddWeight = false
                             newWeight = 0
+                            isAnimating = true
                         }
                     }
                     ToolbarItem(placement: .cancellationAction) {
@@ -423,6 +442,35 @@ struct WeightProgressView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            if let measurement = selectedMeasurement {
+                NavigationView {
+                    Form {
+                        Section(header: Text("Edit Weight")) {
+                            TextField("Weight (kg)", value: $editedWeight, format: .number)
+                                .keyboardType(.decimalPad)
+                        }
+                    }
+                    .navigationTitle("Edit Weight")
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") {
+                                measurement.weight = editedWeight
+                                showingEditSheet = false
+                            }
+                        }
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") {
+                                showingEditSheet = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
