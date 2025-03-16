@@ -26,8 +26,8 @@ struct TreadmillWorkout: Identifiable, Codable {
     }
     
     var caloriesBurned: Double {
-        let runningCalories = runningDuration * 10 // 10 kalorii na minutę biegu
-        let walkingCalories = walkingDuration * 5 // 5 kalorii na minutę chodu
+        let runningCalories = runningDuration * 10 
+        let walkingCalories = walkingDuration * 5 
         return runningCalories + walkingCalories
     }
     
