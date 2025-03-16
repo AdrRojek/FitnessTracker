@@ -34,7 +34,6 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            // Ekran główny
             NavigationView {
                 Text("Home Screen")
                     .navigationTitle("Home")
@@ -44,7 +43,6 @@ struct ContentView: View {
                 Text("Home")
             }
             
-            // Ekran z treningami
             NavigationView {
                 List {
                     ForEach(sortedWorkouts) { workout in
@@ -79,7 +77,6 @@ struct ContentView: View {
                 Text("Workouts")
             }
             
-            // Ekran postępów wagi
             NavigationView {
                 WeightProgressView()
             }
@@ -88,7 +85,6 @@ struct ContentView: View {
                 Text("Weight")
             }
             
-            // Ekran profilu
             NavigationView {
                 UserProfileView(profile: $userProfile)
             }
@@ -364,7 +360,6 @@ struct WeightProgressView: View {
     
     var body: some View {
         VStack {
-            // Wykres
             Chart {
                 ForEach(measurements.sorted(by: { $0.date < $1.date })) { measurement in
                     LineMark(
@@ -383,7 +378,6 @@ struct WeightProgressView: View {
             .frame(height: 200)
             .padding()
             
-            // Tabela
             List {
                 ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
                     HStack {
