@@ -29,7 +29,7 @@ struct ContentView: View {
         NavigationView {
             List {
                 ForEach(workouts.sorted(by: { $0.date > $1.date })) { workout in
-                    WorkoutRow(workout: workout)
+                    WorkoutRow(workout: workout, userProfile: userProfile)
                         .onTapGesture {
                             selectedWorkout = workout
                             showingDetailsSheet = true
@@ -72,6 +72,7 @@ struct ContentView: View {
 
 struct WorkoutRow: View {
     let workout: TreadmillWorkout
+    let userProfile: UserProfile
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -80,7 +81,7 @@ struct WorkoutRow: View {
             HStack {
                 Text("Total: \(formatMinutes(workout.totalDuration))")
                 Spacer()
-                Text(String(format: "%.1f km/h", workout.averageSpeed))
+                Text(String(format: "%.0f kcal", workout.calculateCaloriesBurned(userProfile: userProfile)))
             }
             HStack {
                 Text("Running: \(formatMinutes(workout.runningDuration))")
@@ -89,6 +90,11 @@ struct WorkoutRow: View {
             }
             HStack {
                 Text("Walking: \(formatMinutes(workout.walkingDuration))")
+                Spacer()
+                Text(String(format: "%.1f km/h", workout.walkingSpeed))
+            }
+            HStack {
+                Text("Average: \(String(format: "%.1f km/h", workout.averageSpeed))")
             }
         }
         .padding(.vertical, 8)
