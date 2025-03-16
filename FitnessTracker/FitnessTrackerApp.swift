@@ -4,10 +4,10 @@ import SwiftData
 struct TreadmillWorkout: Identifiable, Codable {
     var id = UUID()
     var date: Date
-    var totalDuration: Double // w minutach
-    var walkingSpeed: Double // km/h (prędkość chodu)
-    var runningDuration: Double // w minutach
-    var runningSpeed: Double // km/h
+    var totalDuration: Double 
+    var walkingSpeed: Double 
+    var runningDuration: Double 
+    var runningSpeed: Double 
     
     var walkingDuration: Double {
         totalDuration - runningDuration
