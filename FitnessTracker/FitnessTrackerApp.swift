@@ -21,12 +21,10 @@ struct TreadmillWorkout: Identifiable, Codable {
         (walkingDuration / 60) * walkingSpeed
     }
     
-    // Obliczanie całkowitego dystansu w kilometrach
     var totalDistance: Double {
         runningDistance + walkingDistance
     }
     
-    // Szacowanie spalonych kalorii (przykładowy wzór)
     var caloriesBurned: Double {
         let runningCalories = runningDuration * 10 // 10 kalorii na minutę biegu
         let walkingCalories = walkingDuration * 5 // 5 kalorii na minutę chodu
