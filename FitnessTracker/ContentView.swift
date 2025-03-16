@@ -298,6 +298,14 @@ struct UserProfileView: View {
             Form {
                 Section(header: Text("Weight")) {
                     TextField("Weight (kg)", value: $profile.weight, format: .number)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .overlay(
+                            Text("\(profile.weight, specifier: "%.1f") kg")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 8)
+                                .opacity(profile.weight == 0 ? 1 : 0),
+                            alignment: .trailing
+                        )
                 }
                 Section(header: Text("Height")) {
                     TextField("Height (cm)", value: $profile.height, format: .number)
