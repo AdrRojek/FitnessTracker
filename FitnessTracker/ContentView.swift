@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Charts
 
 func formatMinutes(_ minutes: Double) -> String {
     let totalSeconds = Int(minutes * 60)
@@ -80,8 +81,7 @@ struct ContentView: View {
             
             // Ekran postępów wagi
             NavigationView {
-                Text("Weight Progress")
-                    .navigationTitle("Weight")
+                WeightProgressView()
             }
             .tabItem {
                 Image(systemName: "chart.line.uptrend.xyaxis")
@@ -353,6 +353,83 @@ struct UserProfileView: View {
             }
         }
         .environment(\.modelContext, modelContext)
+    }
+}
+
+struct WeightProgressView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var measurements: [WeightMeasurement]
+    @State private var showingAddWeight = false
+    @State private var newWeight: Double = 0
+    
+    var body: some View {
+        VStack {
+            // Wykres
+            Chart {
+                ForEach(measurements.sorted(by: { $0.date < $1.date })) { measurement in
+                    LineMark(
+                        x: .value("Date", measurement.date),
+                        y: .value("Weight", measurement.weight)
+                    )
+                    .foregroundStyle(.blue)
+                    
+                    PointMark(
+                        x: .value("Date", measurement.date),
+                        y: .value("Weight", measurement.weight)
+                    )
+                    .foregroundStyle(.blue)
+                }
+            }
+            .frame(height: 200)
+            .padding()
+            
+            // Tabela
+            List {
+                ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
+                    HStack {
+                        Text(measurement.date.formatted(date: .abbreviated, time: .omitted))
+                        Spacer()
+                        Text(String(format: "%.1f kg", measurement.weight))
+                    }
+                }
+            }
+        }
+        .navigationTitle("Weight Progress")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingAddWeight = true
+                }) {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .popover(isPresented: $showingAddWeight) {
+            NavigationView {
+                Form {
+                    Section(header: Text("New Weight")) {
+                        TextField("Weight (kg)", value: $newWeight, format: .number)
+                            .keyboardType(.decimalPad)
+                    }
+                }
+                .navigationTitle("Add Weight")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            let measurement = WeightMeasurement(weight: newWeight)
+                            modelContext.insert(measurement)
+                            showingAddWeight = false
+                            newWeight = 0
+                        }
+                    }
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showingAddWeight = false
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

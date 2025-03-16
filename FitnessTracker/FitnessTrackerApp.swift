@@ -70,7 +70,7 @@ struct FitnessTrackerApp: App {
     
     init() {
         do {
-            container = try ModelContainer(for: UserProfile.self)
+            container = try ModelContainer(for: UserProfile.self, WeightMeasurement.self)
         } catch {
             fatalError("Could not initialize ModelContainer")
         }
