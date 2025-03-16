@@ -22,6 +22,8 @@ struct ContentView: View {
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
     @State private var showingDetailsSheet = false
+    @State private var showingProfileSheet = false
+    @State private var userProfile = UserProfile(weight: 70, height: 175, gender: .male)
     
     var body: some View {
         NavigationView {
@@ -36,10 +38,21 @@ struct ContentView: View {
             }
             .navigationTitle("Treadmill Workouts")
             .toolbar {
-                Button(action: {
-                    showingAddWorkout = true
-                }) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showingProfileSheet = true
+                    }) {
+                        Image(systemName: "person.circle.fill")
+                            .font(.title2)
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingAddWorkout = true
+                    }) {
+                        Image(systemName: "plus")
+                    }
                 }
             }
             .sheet(isPresented: $showingAddWorkout) {
@@ -49,6 +62,9 @@ struct ContentView: View {
                 if let workout = selectedWorkout {
                     WorkoutDetails(workout: workout)
                 }
+            }
+            .sheet(isPresented: $showingProfileSheet) {
+                UserProfileView(profile: $userProfile)
             }
         }
     }
@@ -244,6 +260,66 @@ struct WorkoutForm: View {
                 }
             }
             .navigationTitle("New Workout")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct UserProfileView: View {
+    @Binding var profile: UserProfile
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Personal Information")) {
+                    HStack {
+                        Text("Weight")
+                        Spacer()
+                        TextField("Weight", value: $profile.weight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
+                        Text("kg")
+                    }
+                    
+                    HStack {
+                        Text("Height")
+                        Spacer()
+                        TextField("Height", value: $profile.height, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
+                        Text("cm")
+                    }
+                    
+                    Picker("Gender", selection: $profile.gender) {
+                        ForEach(UserProfile.Gender.allCases, id: \.self) { gender in
+                            Text(gender.rawValue).tag(gender)
+                        }
+                    }
+                }
+                
+                Section {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Text("Save")
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                }
+            }
+            .navigationTitle("User Profile")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
