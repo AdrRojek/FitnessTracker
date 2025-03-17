@@ -348,6 +348,7 @@ struct UserProfileView: View {
 struct WeightProgressView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var measurements: [WeightMeasurement]
+    @Query private var userProfiles: [UserProfile]
     @State private var showingAddWeight = false
     @State private var newWeight: Double = 0
     @State private var isAnimating = false
@@ -389,13 +390,11 @@ struct WeightProgressView: View {
                             selectedMeasurement = measurement
                             editedWeight = measurement.weight
                             showingEditSheet = true
-                            print("DEBUG: edit button tapped")
                         } label: {
                             Image(systemName: "pencil")
                                 .foregroundColor(.blue)
                         }
                         .buttonStyle(.plain)
-                        
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
@@ -405,8 +404,18 @@ struct WeightProgressView: View {
         .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.trailing)) {
             if let measurement = selectedMeasurement {
                 VStack(spacing: 16) {
-                    Text("Edit Weight")
-                        .font(.headline)
+                    HStack {
+                        Text("Edit Weight")
+                            .font(.headline)
+                        Spacer()
+                        Button {
+                            modelContext.delete(measurement)
+                            showingEditSheet = false
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                    }
                     
                     TextField("Weight (kg)", value: $editedWeight, format: .number)
                         .keyboardType(.decimalPad)
@@ -421,6 +430,9 @@ struct WeightProgressView: View {
                         
                         Button("Save") {
                             measurement.weight = editedWeight
+                            if let profile = userProfiles.first {
+                                profile.weight = editedWeight
+                            }
                             showingEditSheet = false
                         }
                         .buttonStyle(.borderedProminent)
@@ -429,52 +441,54 @@ struct WeightProgressView: View {
                 .padding()
                 .frame(width: 200, height: 150)
                 .presentationCompactAdaptation(.popover)
-
             }
         }
-                .padding()
-                .navigationTitle("Weight Progress")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            showingAddWeight = true
-                        }) {
-                            Image(systemName: "plus")
-                        }
-                        .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
-                            VStack(spacing: 16) {
-                                Text("New Weight")
-                                    .font(.headline)
-                                
-                                TextField("Weight (kg)", value: $newWeight, format: .number)
-                                    .keyboardType(.decimalPad)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .padding(.horizontal)
-                                
-                                HStack(spacing: 20) {
-                                    Button("Cancel") {
-                                        showingAddWeight = false
-                                    }
-                                    .buttonStyle(.bordered)
-                                    
-                                    Button("Save") {
-                                        let measurement = WeightMeasurement(weight: newWeight)
-                                        modelContext.insert(measurement)
-                                        showingAddWeight = false
-                                        newWeight = 0
-                                        isAnimating = true
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                }
+        .padding()
+        .navigationTitle("Weight Progress")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingAddWeight = true
+                }) {
+                    Image(systemName: "plus")
+                }
+                .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
+                    VStack(spacing: 16) {
+                        Text("New Weight")
+                            .font(.headline)
+                        
+                        TextField("Weight (kg)", value: $newWeight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                        
+                        HStack(spacing: 20) {
+                            Button("Cancel") {
+                                showingAddWeight = false
                             }
-                            .padding()
-                            .frame(width: 200, height: 150)
-                            .presentationCompactAdaptation(.popover)
+                            .buttonStyle(.bordered)
+                            
+                            Button("Save") {
+                                let measurement = WeightMeasurement(weight: newWeight)
+                                modelContext.insert(measurement)
+                                if let profile = userProfiles.first {
+                                    profile.weight = newWeight
+                                }
+                                showingAddWeight = false
+                                newWeight = 0
+                                isAnimating = true
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
                     }
+                    .padding()
+                    .frame(width: 200, height: 150)
+                    .presentationCompactAdaptation(.popover)
                 }
-                .onAppear {
-                    isAnimating = true
+            }
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
