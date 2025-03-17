@@ -8,7 +8,7 @@ struct FitnessTrackerApp: App {
     
     init() {
         do {
-            container = try ModelContainer(for: TreadmillWorkout.self, UserProfile.self)
+            container = try ModelContainer(for: TreadmillWorkout.self, UserProfile.self, WeightMeasurement.self)
         } catch {
             fatalError("Could not initialize ModelContainer")
         }

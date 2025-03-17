@@ -54,6 +54,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [TreadmillWorkout]
     @Query private var userProfiles: [UserProfile]
+    @Query private var weightMeasurements: [WeightMeasurement]
     @StateObject private var healthKitManager = HealthKitManager()
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
@@ -75,7 +76,7 @@ struct ContentView: View {
                         VStack(alignment: .leading) {
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("kroków dziś")
+                            Text("Steps Today")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -581,4 +582,3 @@ struct WeightProgressView: View {
 #Preview {
     ContentView()
 }
-
