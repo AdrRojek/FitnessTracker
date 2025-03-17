@@ -308,21 +308,53 @@ struct UserProfileView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Weight")) {
+                Section {
                     HStack {
-                        Text("Current Weight")
                         Spacer()
                         Text(String(format: "%.1f kg", profile.weight))
                             .foregroundColor(.gray)
+                        Spacer()
+                    }
+                } header: {
+                    HStack {
+                        Spacer()
+                        Text("Weight")
+                        Spacer()
                     }
                 }
-                Section(header: Text("Height")) {
-                    TextField("Height (cm)", value: $profile.height, format: .number)
+                
+                Section {
+                    HStack {
+                        Spacer()
+                        TextField("Height (cm)", value: $profile.height, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 150)
+                        Spacer()
+                    }
+                } header: {
+                    HStack {
+                        Spacer()
+                        Text("Height")
+                        Spacer()
+                    }
                 }
-                Section(header: Text("Gender")) {
-                    Picker("Gender", selection: $profile.gender) {
-                        Text("Male").tag(UserProfile.Gender.male)
-                        Text("Female").tag(UserProfile.Gender.female)
+                
+                Section {
+                    HStack {
+                        Spacer()
+                        Picker("Gender",selection: $profile.gender) {
+                            Text("Male").tag(UserProfile.Gender.male)
+                            Text("Female").tag(UserProfile.Gender.female)
+                        }
+                        .frame(width: 150)
+                        Spacer()
+                    }
+                } header: {
+                    HStack {
+                        Spacer()
+                        Text("Gender")
+                        Spacer()
                     }
                 }
             }
@@ -338,6 +370,8 @@ struct UserProfileView: View {
             }
         }
         .environment(\.modelContext, modelContext)
+        .frame(maxWidth: 400)
+        .frame(maxWidth: .infinity)
     }
 }
 
