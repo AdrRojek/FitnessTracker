@@ -37,7 +37,7 @@ struct ContentView: View {
             }
             
             NavigationView {
-                List {
+            List {
                     ForEach(sortedWorkouts) { workout in
                         WorkoutRow(workout: workout, userProfile: userProfile)
                             .onTapGesture {
@@ -47,8 +47,8 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle("Workouts")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
                             showingAddWorkout = true
                         }) {
@@ -395,82 +395,85 @@ struct WeightProgressView: View {
                                 .foregroundColor(.blue)
                         }
                         .buttonStyle(.plain)
-                        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
-                            if let measurement = selectedMeasurement {
-                                VStack(spacing: 16) {
-                                    Text("Edit Weight")
-                                        .font(.headline)
-                                    
-                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .padding(.horizontal)
-                                    
-                                    HStack(spacing: 20) {
-                                        Button("Cancel") {
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.bordered)
-                                        
-                                        Button("Save") {
-                                            measurement.weight = editedWeight
-                                            showingEditSheet = false
-                                        }
-                                        .buttonStyle(.borderedProminent)
-                                    }
-                                }
-                                .padding()
-                                .frame(width: 200, height: 150)
-                                .presentationCompactAdaptation(.popover)
-                            }
-                        }
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
             }
+            
         }
-        .navigationTitle("Weight Progress")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingAddWeight = true
-                }) {
-                    Image(systemName: "plus")
-                }
-                .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
-                    VStack(spacing: 16) {
-                        Text("New Weight")
-                            .font(.headline)
-                        
-                        TextField("Weight (kg)", value: $newWeight, format: .number)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: 20) {
-                            Button("Cancel") {
-                                showingAddWeight = false
-                            }
-                            .buttonStyle(.bordered)
-                            
-                            Button("Save") {
-                                let measurement = WeightMeasurement(weight: newWeight)
-                                modelContext.insert(measurement)
-                                showingAddWeight = false
-                                newWeight = 0
-                                isAnimating = true
-                            }
-                            .buttonStyle(.borderedProminent)
+        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.center)) {
+            if let measurement = selectedMeasurement {
+                VStack(spacing: 16) {
+                    Text("Edit Weight")
+                        .font(.headline)
+                    
+                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    HStack(spacing: 20) {
+                        Button("Cancel") {
+                            showingEditSheet = false
                         }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Save") {
+                            measurement.weight = editedWeight
+                            showingEditSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .padding()
-                    .frame(width: 200, height: 150)
-                    .presentationCompactAdaptation(.popover)
                 }
+                .padding()
+                .frame(width: 200, height: 150)
+                .presentationCompactAdaptation(.popover)
+
             }
         }
-        .onAppear {
-            isAnimating = true
+                .padding()
+                .navigationTitle("Weight Progress")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            showingAddWeight = true
+                        }) {
+                            Image(systemName: "plus")
+                        }
+                        .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
+                            VStack(spacing: 16) {
+                                Text("New Weight")
+                                    .font(.headline)
+                                
+                                TextField("Weight (kg)", value: $newWeight, format: .number)
+                                    .keyboardType(.decimalPad)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .padding(.horizontal)
+                                
+                                HStack(spacing: 20) {
+                                    Button("Cancel") {
+                                        showingAddWeight = false
+                                    }
+                                    .buttonStyle(.bordered)
+                                    
+                                    Button("Save") {
+                                        let measurement = WeightMeasurement(weight: newWeight)
+                                        modelContext.insert(measurement)
+                                        showingAddWeight = false
+                                        newWeight = 0
+                                        isAnimating = true
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                }
+                            }
+                            .padding()
+                            .frame(width: 200, height: 150)
+                            .presentationCompactAdaptation(.popover)
+                        }
+                    }
+                }
+                .onAppear {
+                    isAnimating = true
         }
     }
 }
@@ -478,3 +481,4 @@ struct WeightProgressView: View {
 #Preview {
     ContentView()
 }
+
