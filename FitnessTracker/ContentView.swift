@@ -402,7 +402,7 @@ struct WeightProgressView: View {
             }
             
         }
-        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.center)) {
+        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.trailing)) {
             if let measurement = selectedMeasurement {
                 VStack(spacing: 16) {
                     Text("Edit Weight")
