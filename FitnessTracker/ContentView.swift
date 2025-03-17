@@ -387,17 +387,50 @@ struct WeightProgressView: View {
             List {
                 ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
                     HStack {
-                        Text(measurement.date.formatted(date: .abbreviated, time: .shortened))
+                        VStack(alignment: .leading) {
+                            Text(measurement.date.formatted(date: .abbreviated, time: .shortened))
+                            Text(String(format: "%.1f kg", measurement.weight))
+                        }
                         Spacer()
-                        Text(String(format: "%.1f kg", measurement.weight))
-                        Button(action: {
+                        Button {
                             selectedMeasurement = measurement
                             editedWeight = measurement.weight
                             showingEditSheet = true
-                        }) {
+                        } label: {
                             Image(systemName: "pencil")
                         }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
+                            if let measurement = selectedMeasurement {
+                                VStack(spacing: 16) {
+                                    Text("Edit Weight")
+                                        .font(.headline)
+                                    
+                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .padding(.horizontal)
+                                    
+                                    HStack(spacing: 20) {
+                                        Button("Cancel") {
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.bordered)
+                                        
+                                        Button("Save") {
+                                            measurement.weight = editedWeight
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                    }
+                                }
+                                .padding()
+                                .frame(width: 200, height: 150)
+                                .presentationCompactAdaptation(.popover)
+                            }
+                        }
                     }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
             }
         }
@@ -439,35 +472,6 @@ struct WeightProgressView: View {
                     .frame(width: 200, height: 150)
                     .presentationCompactAdaptation(.popover)
                 }
-            }
-        }
-        .sheet(isPresented: $showingEditSheet) {
-            if let measurement = selectedMeasurement {
-                VStack(spacing: 16) {
-                    Text("Edit Weight")
-                        .font(.headline)
-                    
-                    TextField("Weight (kg)", value: $editedWeight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    HStack(spacing: 20) {
-                        Button("Cancel") {
-                            showingEditSheet = false
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Save") {
-                            measurement.weight = editedWeight
-                            showingEditSheet = false
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                }
-                .padding()
-                .frame(width: 200, height: 150)
-                .presentationCompactAdaptation(.popover)
             }
         }
         .onAppear {
