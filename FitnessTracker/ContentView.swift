@@ -12,27 +12,19 @@ func formatMinutes(_ minutes: Double) -> String {
 }
 
 struct ContentView: View {
-    @State private var workouts: [TreadmillWorkout] = [
-        TreadmillWorkout(
-            date: Date(),
-            totalDuration: 45,
-            walkingSpeed: 5.0,
-            runningDuration: 15,
-            runningSpeed: 10.0
-        )
-    ]
+    @Environment(\.modelContext) private var modelContext
+    @Query private var workouts: [TreadmillWorkout]
+    @Query private var userProfiles: [UserProfile]
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
     @State private var showingDetailsSheet = false
     @State private var showingProfileSheet = false
     @State private var userProfile = UserProfile(weight: 70, height: 175, gender: .male)
-    @Environment(\.modelContext) private var modelContext
-    @Query private var userProfiles: [UserProfile]
     
     private var sortedWorkouts: [TreadmillWorkout] {
         workouts.sorted(by: { $0.date > $1.date })
     }
-    
+
     var body: some View {
         TabView {
             NavigationView {
@@ -65,7 +57,7 @@ struct ContentView: View {
                     }
                 }
                 .sheet(isPresented: $showingAddWorkout) {
-                    WorkoutForm(workouts: $workouts)
+                    WorkoutForm()
                 }
                 .sheet(isPresented: $showingDetailsSheet) {
                     if let workout = selectedWorkout {
@@ -106,7 +98,7 @@ struct ContentView: View {
 struct WorkoutRow: View {
     let workout: TreadmillWorkout
     let userProfile: UserProfile
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(workout.date.formatted(date: .abbreviated, time: .shortened))
@@ -135,7 +127,7 @@ struct WorkoutDetails: View {
     let workout: TreadmillWorkout
     let userProfile: UserProfile
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationView {
             List {
@@ -218,7 +210,7 @@ struct WorkoutDetails: View {
 }
 
 struct WorkoutForm: View {
-    @Binding var workouts: [TreadmillWorkout]
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     
     @State private var selectedDate = Date()
@@ -284,7 +276,7 @@ struct WorkoutForm: View {
                             runningDuration: runningDuration,
                             runningSpeed: runningSpeed
                         )
-                        workouts.append(workout)
+                        modelContext.insert(workout)
                         dismiss()
                     }) {
                         Text("Save")
@@ -364,116 +356,116 @@ struct WeightProgressView: View {
     @State private var editedWeight: Double = 0
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Chart {
-                    ForEach(measurements.sorted(by: { $0.date < $1.date })) { measurement in
-                        LineMark(
-                            x: .value("Date", measurement.date),
-                            y: .value("Weight", measurement.weight)
-                        )
-                        .foregroundStyle(.blue)
-                        
-                        PointMark(
-                            x: .value("Date", measurement.date),
-                            y: .value("Weight", measurement.weight)
-                        )
-                        .foregroundStyle(.blue)
-                    }
-                }
-                .frame(height: 200)
-                .padding()
-                .opacity(isAnimating ? 1 : 0)
-                .animation(.easeIn(duration: 1), value: isAnimating)
-                
-                List {
-                    ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(measurement.date.formatted(date: .abbreviated, time: .shortened))
-                                Text(String(format: "%.1f kg", measurement.weight))
-                            }
-                            Spacer()
-                            Button {
-                                selectedMeasurement = measurement
-                                editedWeight = measurement.weight
-                                showingEditSheet = true
-                            } label: {
-                                Image(systemName: "pencil")
-                            }
-                            .buttonStyle(.plain)
-                            .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
-                                if let measurement = selectedMeasurement {
-                                    VStack(spacing: 16) {
-                                        Text("Edit Weight")
-                                            .font(.headline)
-                                        
-                                        TextField("Weight (kg)", value: $editedWeight, format: .number)
-                                            .keyboardType(.decimalPad)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                            .padding(.horizontal)
-                                        
-                                        HStack(spacing: 20) {
-                                            Button("Cancel") {
-                                                showingEditSheet = false
-                                            }
-                                            .buttonStyle(.bordered)
-                                            
-                                            Button("Save") {
-                                                measurement.weight = editedWeight
-                                                showingEditSheet = false
-                                            }
-                                            .buttonStyle(.borderedProminent)
-                                        }
-                                    }
-                                    .padding()
-                                    .frame(width: 200, height: 150)
-                                    .presentationCompactAdaptation(.popover)
-                                }
-                            }
-                        }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    }
+        VStack(spacing: 20) {
+            Chart {
+                ForEach(measurements.sorted(by: { $0.date < $1.date })) { measurement in
+                    LineMark(
+                        x: .value("Date", measurement.date),
+                        y: .value("Weight", measurement.weight)
+                    )
+                    .foregroundStyle(.blue)
+                    
+                    PointMark(
+                        x: .value("Date", measurement.date),
+                        y: .value("Weight", measurement.weight)
+                    )
+                    .foregroundStyle(.blue)
                 }
             }
-            .navigationTitle("Weight Progress")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingAddWeight = true
-                    }) {
-                        Image(systemName: "plus")
-                    }
-                    .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
-                        VStack(spacing: 16) {
-                            Text("New Weight")
-                                .font(.headline)
-                            
-                            TextField("Weight (kg)", value: $newWeight, format: .number)
-                                .keyboardType(.decimalPad)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .padding(.horizontal)
-                            
-                            HStack(spacing: 20) {
-                                Button("Cancel") {
-                                    showingAddWeight = false
+            .frame(height: 200)
+            .padding()
+            .opacity(isAnimating ? 1 : 0)
+            .animation(.easeIn(duration: 1), value: isAnimating)
+            
+            List {
+                ForEach(measurements.sorted(by: { $0.date > $1.date })) { measurement in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(measurement.date.formatted(date: .abbreviated, time: .shortened))
+                            Text(String(format: "%.1f kg", measurement.weight))
+                        }
+                        Spacer()
+                        Button {
+                            selectedMeasurement = measurement
+                            editedWeight = measurement.weight
+                            showingEditSheet = true
+                            print("DEBUG: edit button tapped")
+                        } label: {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showingEditSheet, attachmentAnchor: .point(.top)) {
+                            if let measurement = selectedMeasurement {
+                                VStack(spacing: 16) {
+                                    Text("Edit Weight")
+                                        .font(.headline)
+                                    
+                                    TextField("Weight (kg)", value: $editedWeight, format: .number)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .padding(.horizontal)
+                                    
+                                    HStack(spacing: 20) {
+                                        Button("Cancel") {
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.bordered)
+                                        
+                                        Button("Save") {
+                                            measurement.weight = editedWeight
+                                            showingEditSheet = false
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                    }
                                 }
-                                .buttonStyle(.bordered)
-                                
-                                Button("Save") {
-                                    let measurement = WeightMeasurement(weight: newWeight)
-                                    modelContext.insert(measurement)
-                                    showingAddWeight = false
-                                    newWeight = 0
-                                    isAnimating = true
-                                }
-                                .buttonStyle(.borderedProminent)
+                                .padding()
+                                .frame(width: 200, height: 150)
+                                .presentationCompactAdaptation(.popover)
                             }
                         }
-                        .padding()
-                        .frame(width: 200, height: 150)
-                        .presentationCompactAdaptation(.popover)
                     }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                }
+            }
+        }
+        .navigationTitle("Weight Progress")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingAddWeight = true
+                }) {
+                    Image(systemName: "plus")
+                }
+                .popover(isPresented: $showingAddWeight, attachmentAnchor: .point(.top)) {
+                    VStack(spacing: 16) {
+                        Text("New Weight")
+                            .font(.headline)
+                        
+                        TextField("Weight (kg)", value: $newWeight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                        
+                        HStack(spacing: 20) {
+                            Button("Cancel") {
+                                showingAddWeight = false
+                            }
+                            .buttonStyle(.bordered)
+                            
+                            Button("Save") {
+                                let measurement = WeightMeasurement(weight: newWeight)
+                                modelContext.insert(measurement)
+                                showingAddWeight = false
+                                newWeight = 0
+                                isAnimating = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                    .padding()
+                    .frame(width: 200, height: 150)
+                    .presentationCompactAdaptation(.popover)
                 }
             }
         }
