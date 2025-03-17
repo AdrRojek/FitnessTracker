@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import Charts
 import Foundation
+import HealthKit
 
 func formatMinutes(_ minutes: Double) -> String {
     let totalSeconds = Int(minutes * 60)
@@ -11,10 +12,49 @@ func formatMinutes(_ minutes: Double) -> String {
     return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
 }
 
+class HealthKitManager: ObservableObject {
+    let healthStore = HKHealthStore()
+    @Published var steps: Int = 0
+    
+    init() {
+        requestAuthorization()
+    }
+    
+    func requestAuthorization() {
+        let stepType = HKQuantityType(.stepCount)
+        let typesToRead: Set<HKObjectType> = [stepType]
+        
+        healthStore.requestAuthorization(toShare: [], read: typesToRead) { success, error in
+            if success {
+                self.fetchSteps()
+            }
+        }
+    }
+    
+    func fetchSteps() {
+        let stepType = HKQuantityType(.stepCount)
+        let now = Date()
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+        
+        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, statistics, error in
+            guard let statistics = statistics, let sum = statistics.sumQuantity() else { return }
+            
+            DispatchQueue.main.async {
+                self.steps = Int(sum.doubleValue(for: .count()))
+            }
+        }
+        
+        healthStore.execute(query)
+    }
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [TreadmillWorkout]
     @Query private var userProfiles: [UserProfile]
+    @StateObject private var healthKitManager = HealthKitManager()
     @State private var showingAddWorkout = false
     @State private var selectedWorkout: TreadmillWorkout?
     @State private var showingDetailsSheet = false
@@ -28,8 +68,23 @@ struct ContentView: View {
     var body: some View {
         TabView {
             NavigationView {
-                Text("Home Screen")
-                    .navigationTitle("Home")
+                VStack(spacing: 20) {
+                    HStack {
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 40))
+                        VStack(alignment: .leading) {
+                            Text("\(healthKitManager.steps)")
+                                .font(.system(size: 40, weight: .bold))
+                            Text("kroków dziś")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding()
+                    
+                    Spacer()
+                }
+                .navigationTitle("Home")
             }
             .tabItem {
                 Image(systemName: "house.fill")

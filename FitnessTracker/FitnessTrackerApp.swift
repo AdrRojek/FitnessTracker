@@ -1,18 +1,31 @@
 import SwiftUI
 import SwiftData
+import HealthKit
 
 @main
 struct FitnessTrackerApp: App {
-    let modelContainer: ModelContainer
+    let container: ModelContainer
     
     init() {
         do {
-            modelContainer = try ModelContainer(
-                for: UserProfile.self, TreadmillWorkout.self, WeightMeasurement.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: false)
-            )
+            container = try ModelContainer(for: TreadmillWorkout.self, UserProfile.self)
         } catch {
             fatalError("Could not initialize ModelContainer")
+        }
+        
+        // Dodaj uprawnienia HealthKit
+        if HKHealthStore.isHealthDataAvailable() {
+            let healthStore = HKHealthStore()
+            let stepType = HKQuantityType(.stepCount)
+            let typesToRead: Set<HKObjectType> = [stepType]
+            
+            healthStore.requestAuthorization(toShare: [], read: typesToRead) { success, error in
+                if success {
+                    print("HealthKit authorization granted")
+                } else {
+                    print("HealthKit authorization failed")
+                }
+            }
         }
     }
     
@@ -20,6 +33,6 @@ struct FitnessTrackerApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(modelContainer)
+        .modelContainer(container)
     }
 }
