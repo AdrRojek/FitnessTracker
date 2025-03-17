@@ -309,15 +309,12 @@ struct UserProfileView: View {
         NavigationView {
             Form {
                 Section(header: Text("Weight")) {
-                    TextField("Weight (kg)", value: $profile.weight, format: .number)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .overlay(
-                            Text("\(profile.weight, specifier: "%.1f") kg")
-                                .foregroundColor(.gray)
-                                .padding(.trailing, 8)
-                                .opacity(profile.weight == 0 ? 1 : 0),
-                            alignment: .trailing
-                        )
+                    HStack {
+                        Text("Current Weight")
+                        Spacer()
+                        Text(String(format: "%.1f kg", profile.weight))
+                            .foregroundColor(.gray)
+                    }
                 }
                 Section(header: Text("Height")) {
                     TextField("Height (cm)", value: $profile.height, format: .number)
@@ -326,7 +323,6 @@ struct UserProfileView: View {
                     Picker("Gender", selection: $profile.gender) {
                         Text("Male").tag(UserProfile.Gender.male)
                         Text("Female").tag(UserProfile.Gender.female)
-                        Text("Other").tag(UserProfile.Gender.other)
                     }
                 }
             }
