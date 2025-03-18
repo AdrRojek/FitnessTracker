@@ -662,6 +662,15 @@ struct WeightProgressView: View {
                         Spacer()
                         Button {
                             modelContext.delete(measurement)
+                            if let profile = userProfiles.first {
+                                // Znajdź ostatni pomiar wagi (pomijając aktualnie usuwany)
+                                let sortedMeasurements = measurements
+                                    .filter { $0.id != measurement.id }
+                                    .sorted(by: { $0.date > $1.date })
+                                if let lastMeasurement = sortedMeasurements.first {
+                                    profile.weight = lastMeasurement.weight
+                                }
+                            }
                             showingEditSheet = false
                         } label: {
                             Image(systemName: "trash")
