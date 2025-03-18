@@ -137,7 +137,7 @@ struct ContentView: View {
                                 )
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("kroków dziś")
+                            Text("steps today")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -150,7 +150,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance()))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Dystans (kroki)")
+                                Text("Distance (steps)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -164,7 +164,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance() + todaysTotalDistance))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Dystans (całkowity)")
+                                Text("Distance (total)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -180,7 +180,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height)))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Kalorie (kroki)")
+                                Text("Calories (steps)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -194,7 +194,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height) + todaysTotalCalories))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Kalorie (całkowite)")
+                                Text("Calories (total)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -386,7 +386,7 @@ struct WorkoutDetails: View {
                     }) {
                         HStack {
                             Image(systemName: "trash")
-                            Text("Usuń trening")
+                            Text("Delete workout")
                         }
                         .foregroundColor(.red)
                         .frame(maxWidth: .infinity)
@@ -695,7 +695,7 @@ struct WeightProgressView: View {
                         Button {
                             modelContext.delete(measurement)
                             if let profile = userProfiles.first {
-                                // Znajdź ostatni pomiar wagi (pomijając aktualnie usuwany)
+                                // Find last weight measurement (excluding the one being deleted)
                                 let sortedMeasurements = measurements
                                     .filter { $0.id != measurement.id }
                                     .sorted(by: { $0.date > $1.date })
