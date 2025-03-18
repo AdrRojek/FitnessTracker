@@ -389,6 +389,15 @@ struct WorkoutDetails: View {
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .destructiveAction) {
+                    Button(action: {
+                        modelContext.delete(workout)
+                        dismiss()
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                }
             }
         }
     }
