@@ -54,9 +54,20 @@ class HealthKitManager: ObservableObject {
         return Double(steps) * 0.762 / 1000 // konwersja na kilometry
     }
     
-    func calculateStepsCalories(weight: Double) -> Double {
-        // Przybliżone spalanie kalorii: 0.04 kcal * waga(kg) na 1000 kroków
-        return Double(steps) * 0.04 * weight / 1000
+    func calculateStepsCalories(weight: Double, height: Double) -> Double {
+        // Używamy wzoru MET dla chodzenia z prędkością 4.8 km/h (3.0 MET)
+        // Kalorie = MET * 3.5 * waga(kg) * czas(min) / 200
+        
+        // Obliczamy czas chodzenia w minutach
+        // Przy prędkości 4.8 km/h = 80m/min
+        // Długość kroku = 0.762m
+        let totalDistanceMeters = Double(steps) * 0.762
+        let walkingTimeMinutes = totalDistanceMeters / 80.0
+        
+        // MET dla chodzenia 4.8 km/h = 3.0
+        let met = 3.0
+        
+        return (met * 3.5 * weight * walkingTimeMinutes) / 200.0
     }
 }
 
@@ -167,7 +178,7 @@ struct ContentView: View {
                         
                         HStack(spacing: 20) {
                             VStack {
-                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight)))
+                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height)))
                                     .font(.system(size: 20, weight: .bold))
                                 Text("Kalorie (kroki)")
                                     .font(.caption)
@@ -181,7 +192,7 @@ struct ContentView: View {
                             )
                             
                             VStack {
-                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight) + todaysTotalCalories))
+                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height) + todaysTotalCalories))
                                     .font(.system(size: 20, weight: .bold))
                                 Text("Kalorie (całkowite)")
                                     .font(.caption)
