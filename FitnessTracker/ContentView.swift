@@ -137,7 +137,7 @@ struct ContentView: View {
                                 )
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("kroków dziś")
+                            Text("steps today")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -150,7 +150,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance()))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Dystans (kroki)")
+                                Text("Distance (steps)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -164,7 +164,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance() + todaysTotalDistance))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Dystans (całkowity)")
+                                Text("Distance (total)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -180,7 +180,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height)))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Kalorie (kroki)")
+                                Text("Calories (steps)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -194,7 +194,7 @@ struct ContentView: View {
                             VStack {
                                 Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight, height: userProfile.height) + todaysTotalCalories))
                                     .font(.system(size: 20, weight: .bold))
-                                Text("Kalorie (całkowite)")
+                                Text("Calories (total)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -207,6 +207,35 @@ struct ContentView: View {
                         }
                     }
                     .padding(.horizontal)
+                    
+                    if !sortedWorkouts.isEmpty {
+                        VStack(spacing: 8) {
+                            Text("Recent Workouts")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            
+                            ForEach(Array(sortedWorkouts.prefix(3))) { workout in
+                                HStack {
+                                    Text(workout.date.formatted(date: .abbreviated, time: .shortened))
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Spacer()
+                                    Text(String(format: "%.1f km", workout.totalDistance))
+                                        .font(.caption)
+                                    Text(String(format: "%.0f kcal", workout.calculateCaloriesBurned(userProfile: userProfile)))
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.gray.opacity(0.1))
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                     
                     Spacer()
                 }
@@ -386,7 +415,7 @@ struct WorkoutDetails: View {
                     }) {
                         HStack {
                             Image(systemName: "trash")
-                            Text("Usuń trening")
+                            Text("Delete workout")
                         }
                         .foregroundColor(.red)
                         .frame(maxWidth: .infinity)
@@ -509,6 +538,8 @@ struct UserProfileView: View {
     @Binding var profile: UserProfile
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
+    @State private var isEditing = false
+    @State private var editedProfile: UserProfile?
     
     var body: some View {
         NavigationView {
@@ -531,10 +562,15 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        TextField("Height (cm)", value: $profile.height, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 150)
+                        if isEditing {
+                            TextField("Height (cm)", value: $profile.height, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 150)
+                        } else {
+                            Text(String(format: "%.1f cm", profile.height))
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                     }
                 } header: {
@@ -548,11 +584,16 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        Picker("Gender", selection: $profile.gender) {
-                            Text("Male").tag(UserProfile.Gender.male)
-                            Text("Female").tag(UserProfile.Gender.female)
+                        if isEditing {
+                            Picker("Gender", selection: $profile.gender) {
+                                Text("Male").tag(UserProfile.Gender.male)
+                                Text("Female").tag(UserProfile.Gender.female)
+                            }
+                            .frame(width: 150)
+                        } else {
+                            Text(profile.gender == .male ? "Male" : "Female")
+                                .foregroundColor(.gray)
                         }
-                        .frame(width: 150)
                         Spacer()
                     }
                 } header: {
@@ -566,10 +607,15 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        TextField("Daily Steps Goal", value: $profile.dailyStepsGoal, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 150)
+                        if isEditing {
+                            TextField("Daily Steps Goal", value: $profile.dailyStepsGoal, format: .number)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 150)
+                        } else {
+                            Text("\(profile.dailyStepsGoal) steps")
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                     }
                 } header: {
@@ -582,13 +628,28 @@ struct UserProfileView: View {
             }
             .navigationTitle("User Profile")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        modelContext.insert(profile)
-                        print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender), goal: \(profile.dailyStepsGoal) steps")
-                        dismiss()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(isEditing ? "Save" : "Edit") {
+                        if isEditing {
+                            modelContext.insert(profile)
+                            print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender), goal: \(profile.dailyStepsGoal) steps")
+                        }
+                        isEditing.toggle()
                     }
                 }
+                if isEditing {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            if let savedProfile = editedProfile {
+                                profile = savedProfile
+                            }
+                            isEditing = false
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                editedProfile = profile
             }
         }
         .environment(\.modelContext, modelContext)
@@ -662,6 +723,15 @@ struct WeightProgressView: View {
                         Spacer()
                         Button {
                             modelContext.delete(measurement)
+                            if let profile = userProfiles.first {
+                                // Find last weight measurement (excluding the one being deleted)
+                                let sortedMeasurements = measurements
+                                    .filter { $0.id != measurement.id }
+                                    .sorted(by: { $0.date > $1.date })
+                                if let lastMeasurement = sortedMeasurements.first {
+                                    profile.weight = lastMeasurement.weight
+                                }
+                            }
                             showingEditSheet = false
                         } label: {
                             Image(systemName: "trash")
