@@ -509,6 +509,8 @@ struct UserProfileView: View {
     @Binding var profile: UserProfile
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
+    @State private var isEditing = false
+    @State private var editedProfile: UserProfile?
     
     var body: some View {
         NavigationView {
@@ -531,10 +533,15 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        TextField("Height (cm)", value: $profile.height, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 150)
+                        if isEditing {
+                            TextField("Height (cm)", value: $profile.height, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 150)
+                        } else {
+                            Text(String(format: "%.1f cm", profile.height))
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                     }
                 } header: {
@@ -548,11 +555,16 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        Picker("Gender", selection: $profile.gender) {
-                            Text("Male").tag(UserProfile.Gender.male)
-                            Text("Female").tag(UserProfile.Gender.female)
+                        if isEditing {
+                            Picker("Gender", selection: $profile.gender) {
+                                Text("Male").tag(UserProfile.Gender.male)
+                                Text("Female").tag(UserProfile.Gender.female)
+                            }
+                            .frame(width: 150)
+                        } else {
+                            Text(profile.gender == .male ? "Male" : "Female")
+                                .foregroundColor(.gray)
                         }
-                        .frame(width: 150)
                         Spacer()
                     }
                 } header: {
@@ -566,10 +578,15 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        TextField("Daily Steps Goal", value: $profile.dailyStepsGoal, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 150)
+                        if isEditing {
+                            TextField("Daily Steps Goal", value: $profile.dailyStepsGoal, format: .number)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 150)
+                        } else {
+                            Text("\(profile.dailyStepsGoal) steps")
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                     }
                 } header: {
@@ -582,13 +599,28 @@ struct UserProfileView: View {
             }
             .navigationTitle("User Profile")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        modelContext.insert(profile)
-                        print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender), goal: \(profile.dailyStepsGoal) steps")
-                        dismiss()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(isEditing ? "Save" : "Edit") {
+                        if isEditing {
+                            modelContext.insert(profile)
+                            print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender), goal: \(profile.dailyStepsGoal) steps")
+                        }
+                        isEditing.toggle()
                     }
                 }
+                if isEditing {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            if let savedProfile = editedProfile {
+                                profile = savedProfile
+                            }
+                            isEditing = false
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                editedProfile = profile
             }
         }
         .environment(\.modelContext, modelContext)
