@@ -1,32 +1,40 @@
-//
-//  FitnessTrackerApp.swift
-//  FitnessTracker
-//
-//  Created by adrian on 15/03/2025.
-//
-
 import SwiftUI
 import SwiftData
+import HealthKit
 
 @main
 struct FitnessTrackerApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+    let container: ModelContainer
+    
+    init() {
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            // Initialize the ModelContainer with your models
+            container = try ModelContainer(for: UserProfile.self, WeightMeasurement.self, TreadmillWorkout.self)
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            // Print the error for debugging
+            fatalError("Could not initialize ModelContainer: \(error)")
         }
-    }()
-
+        
+        // Request HealthKit authorization
+        if HKHealthStore.isHealthDataAvailable() {
+            let healthStore = HKHealthStore()
+            let stepType = HKQuantityType(.stepCount)
+            let typesToRead: Set<HKObjectType> = [stepType]
+            
+            healthStore.requestAuthorization(toShare: [], read: typesToRead) { success, error in
+                if success {
+                    print("HealthKit authorization granted")
+                } else if let error = error {
+                    print("HealthKit authorization failed: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container)
     }
 }
