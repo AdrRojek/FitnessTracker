@@ -75,6 +75,20 @@ struct ContentView: View {
     private var sortedWorkouts: [TreadmillWorkout] {
         workouts.sorted(by: { $0.date > $1.date })
     }
+    
+    private var todaysWorkouts: [TreadmillWorkout] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return workouts.filter { calendar.startOfDay(for: $0.date) == today }
+    }
+    
+    private var todaysTotalDistance: Double {
+        todaysWorkouts.reduce(0) { $0 + $1.totalDistance }
+    }
+    
+    private var todaysTotalCalories: Double {
+        todaysWorkouts.reduce(0) { $0 + $1.calculateCaloriesBurned(userProfile: userProfile) }
+    }
 
     var body: some View {
         TabView {
@@ -137,7 +151,7 @@ struct ContentView: View {
                             )
                             
                             VStack {
-                                Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance() + (sortedWorkouts.first?.totalDistance ?? 0)))
+                                Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance() + todaysTotalDistance))
                                     .font(.system(size: 20, weight: .bold))
                                 Text("Dystans (całkowity)")
                                     .font(.caption)
@@ -167,7 +181,7 @@ struct ContentView: View {
                             )
                             
                             VStack {
-                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight) + (sortedWorkouts.first?.calculateCaloriesBurned(userProfile: userProfile) ?? 0)))
+                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight) + todaysTotalCalories))
                                     .font(.system(size: 20, weight: .bold))
                                 Text("Kalorie (całkowite)")
                                     .font(.caption)
@@ -283,6 +297,7 @@ struct WorkoutDetails: View {
     let workout: TreadmillWorkout
     let userProfile: UserProfile
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationView {
@@ -350,6 +365,20 @@ struct WorkoutDetails: View {
                         Text("Burned")
                         Spacer()
                         Text(String(format: "%.0f kcal", workout.calculateCaloriesBurned(userProfile: userProfile)))
+                    }
+                }
+                
+                Section {
+                    Button(action: {
+                        modelContext.delete(workout)
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Usuń trening")
+                        }
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
                     }
                 }
             }
