@@ -8,12 +8,14 @@ struct FitnessTrackerApp: App {
     
     init() {
         do {
-            container = try ModelContainer(for: TreadmillWorkout.self, UserProfile.self, WeightMeasurement.self)
+            // Initialize the ModelContainer with your models
+            container = try ModelContainer(for: UserProfile.self, WeightMeasurement.self, TreadmillWorkout.self)
         } catch {
-            fatalError("Could not initialize ModelContainer")
+            // Print the error for debugging
+            fatalError("Could not initialize ModelContainer: \(error)")
         }
         
-        // Dodaj uprawnienia HealthKit
+        // Request HealthKit authorization
         if HKHealthStore.isHealthDataAvailable() {
             let healthStore = HKHealthStore()
             let stepType = HKQuantityType(.stepCount)
@@ -22,8 +24,8 @@ struct FitnessTrackerApp: App {
             healthStore.requestAuthorization(toShare: [], read: typesToRead) { success, error in
                 if success {
                     print("HealthKit authorization granted")
-                } else {
-                    print("HealthKit authorization failed")
+                } else if let error = error {
+                    print("HealthKit authorization failed: \(error.localizedDescription)")
                 }
             }
         }

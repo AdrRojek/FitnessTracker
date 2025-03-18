@@ -70,18 +70,36 @@ struct ContentView: View {
         TabView {
             NavigationView {
                 VStack(spacing: 20) {
-                    HStack {
-                        Image(systemName: "figure.walk")
-                            .font(.system(size: 40))
-                        VStack(alignment: .leading) {
+                    ZStack {
+                        Circle()
+                            .stroke(lineWidth: 20)
+                            .opacity(0.3)
+                            .foregroundColor(.gray)
+                        
+                        Circle()
+                            .trim(from: 0.0, to: min(CGFloat(healthKitManager.steps) / CGFloat(userProfile.dailyStepsGoal), 1.0))
+                            .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
+                            .foregroundColor(.blue)
+                            .rotationEffect(Angle(degrees: 270.0))
+                            .animation(.linear, value: healthKitManager.steps)
+                        
+                        VStack {
+                            Image(systemName: "figure.walk")
+                                .font(.system(size: 40))
+                                .foregroundColor(.blue)
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("Steps Today")
+                            Text("kroków dziś")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
                     }
+                    .frame(width: 250, height: 250)
                     .padding()
+                    
+                    Text("Cel: \(userProfile.dailyStepsGoal) kroków")
+                        .font(.headline)
+                        .foregroundColor(.gray)
                     
                     Spacer()
                 }
@@ -93,7 +111,7 @@ struct ContentView: View {
             }
             
             NavigationView {
-            List {
+                List {
                     ForEach(sortedWorkouts) { workout in
                         WorkoutRow(workout: workout, userProfile: userProfile)
                             .onTapGesture {
@@ -103,8 +121,8 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle("Workouts")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
                             showingAddWorkout = true
                         }) {
@@ -112,13 +130,13 @@ struct ContentView: View {
                         }
                     }
                 }
-                .sheet(isPresented: $showingAddWorkout) {
-                    WorkoutForm()
-                }
-                .sheet(isPresented: $showingDetailsSheet) {
-                    if let workout = selectedWorkout {
-                        WorkoutDetails(workout: workout, userProfile: userProfile)
-                    }
+            }
+            .sheet(isPresented: $showingAddWorkout) {
+                WorkoutForm()
+            }
+            .sheet(isPresented: $showingDetailsSheet) {
+                if let workout = selectedWorkout {
+                    WorkoutDetails(workout: workout, userProfile: userProfile)
                 }
             }
             .tabItem {
@@ -399,7 +417,7 @@ struct UserProfileView: View {
                 Section {
                     HStack {
                         Spacer()
-                        Picker("Gender",selection: $profile.gender) {
+                        Picker("Gender", selection: $profile.gender) {
                             Text("Male").tag(UserProfile.Gender.male)
                             Text("Female").tag(UserProfile.Gender.female)
                         }
@@ -413,13 +431,30 @@ struct UserProfileView: View {
                         Spacer()
                     }
                 }
+                
+                Section {
+                    HStack {
+                        Spacer()
+                        TextField("Daily Steps Goal", value: $profile.dailyStepsGoal, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 150)
+                        Spacer()
+                    }
+                } header: {
+                    HStack {
+                        Spacer()
+                        Text("Daily Steps Goal")
+                        Spacer()
+                    }
+                }
             }
             .navigationTitle("User Profile")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         modelContext.insert(profile)
-                        print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender)")
+                        print("Profile saved: \(profile.weight) kg, \(profile.height) cm, \(profile.gender), goal: \(profile.dailyStepsGoal) steps")
                         dismiss()
                     }
                 }

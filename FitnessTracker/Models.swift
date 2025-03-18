@@ -6,6 +6,7 @@ final class UserProfile {
     var weight: Double // w kg
     var height: Double // w cm
     var gender: Gender
+    var dailyStepsGoal: Int
     
     enum Gender: String, Codable {
         case male
@@ -13,10 +14,11 @@ final class UserProfile {
         case other
     }
     
-    init(weight: Double = 70, height: Double = 175, gender: Gender = .male) {
+    init(weight: Double = 70, height: Double = 175, gender: Gender = .male, dailyStepsGoal: Int = 10000) {
         self.weight = weight
         self.height = height
         self.gender = gender
+        self.dailyStepsGoal = dailyStepsGoal
     }
 }
 
@@ -32,8 +34,7 @@ final class WeightMeasurement {
 }
 
 @Model
-final class TreadmillWorkout: Identifiable {
-    var id = UUID()
+final class TreadmillWorkout {
     var date: Date
     var totalDuration: Double
     var walkingSpeed: Double
@@ -61,7 +62,6 @@ final class TreadmillWorkout: Identifiable {
     }
     
     init(date: Date = Date(), totalDuration: Double, walkingSpeed: Double, runningDuration: Double, runningSpeed: Double) {
-        self.id = UUID()
         self.date = date
         self.totalDuration = totalDuration
         self.walkingSpeed = walkingSpeed
