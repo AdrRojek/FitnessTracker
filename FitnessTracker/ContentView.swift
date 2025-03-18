@@ -79,17 +79,30 @@ struct ContentView: View {
                         Circle()
                             .trim(from: 0.0, to: min(CGFloat(healthKitManager.steps) / CGFloat(userProfile.dailyStepsGoal), 1.0))
                             .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
-                            .foregroundColor(.blue)
+                            .fill(
+                                AngularGradient(
+                                    gradient: Gradient(colors: [.blue, .purple, .blue]),
+                                    center: .center,
+                                    startAngle: .degrees(0),
+                                    endAngle: .degrees(360)
+                                )
+                            )
                             .rotationEffect(Angle(degrees: 270.0))
                             .animation(.linear, value: healthKitManager.steps)
                         
                         VStack {
                             Image(systemName: "figure.walk")
                                 .font(.system(size: 40))
-                                .foregroundColor(.blue)
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.blue, .purple]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("kroków dziś")
+                            Text("Steps Today")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -97,9 +110,6 @@ struct ContentView: View {
                     .frame(width: 250, height: 250)
                     .padding()
                     
-                    Text("Cel: \(userProfile.dailyStepsGoal) kroków")
-                        .font(.headline)
-                        .foregroundColor(.gray)
                     
                     Spacer()
                 }
