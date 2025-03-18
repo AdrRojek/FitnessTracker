@@ -208,6 +208,35 @@ struct ContentView: View {
                     }
                     .padding(.horizontal)
                     
+                    if !sortedWorkouts.isEmpty {
+                        VStack(spacing: 8) {
+                            Text("Recent Workouts")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            
+                            ForEach(Array(sortedWorkouts.prefix(3))) { workout in
+                                HStack {
+                                    Text(workout.date.formatted(date: .abbreviated, time: .shortened))
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Spacer()
+                                    Text(String(format: "%.1f km", workout.totalDistance))
+                                        .font(.caption)
+                                    Text(String(format: "%.0f kcal", workout.calculateCaloriesBurned(userProfile: userProfile)))
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.gray.opacity(0.1))
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    
                     Spacer()
                 }
                 .navigationTitle("Home")
