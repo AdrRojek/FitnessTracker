@@ -48,6 +48,16 @@ class HealthKitManager: ObservableObject {
         
         healthStore.execute(query)
     }
+    
+    func calculateStepsDistance() -> Double {
+        // Średnia długość kroku to około 0.762 metra
+        return Double(steps) * 0.762 / 1000 // konwersja na kilometry
+    }
+    
+    func calculateStepsCalories(weight: Double) -> Double {
+        // Przybliżone spalanie kalorii: 0.04 kcal * waga(kg) na 1000 kroków
+        return Double(steps) * 0.04 * weight / 1000
+    }
 }
 
 struct ContentView: View {
@@ -102,7 +112,7 @@ struct ContentView: View {
                                 )
                             Text("\(healthKitManager.steps)")
                                 .font(.system(size: 40, weight: .bold))
-                            Text("Steps Today")
+                            Text("kroków dziś")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -110,6 +120,68 @@ struct ContentView: View {
                     .frame(width: 250, height: 250)
                     .padding()
                     
+                    VStack(spacing: 15) {
+                        HStack(spacing: 20) {
+                            VStack {
+                                Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance()))
+                                    .font(.system(size: 20, weight: .bold))
+                                Text("Dystans (kroki)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.1))
+                            )
+                            
+                            VStack {
+                                Text(String(format: "%.2f km", healthKitManager.calculateStepsDistance() + (sortedWorkouts.first?.totalDistance ?? 0)))
+                                    .font(.system(size: 20, weight: .bold))
+                                Text("Dystans (całkowity)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.1))
+                            )
+                        }
+                        
+                        HStack(spacing: 20) {
+                            VStack {
+                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight)))
+                                    .font(.system(size: 20, weight: .bold))
+                                Text("Kalorie (kroki)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.1))
+                            )
+                            
+                            VStack {
+                                Text(String(format: "%.0f kcal", healthKitManager.calculateStepsCalories(weight: userProfile.weight) + (sortedWorkouts.first?.calculateCaloriesBurned(userProfile: userProfile) ?? 0)))
+                                    .font(.system(size: 20, weight: .bold))
+                                Text("Kalorie (całkowite)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.1))
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     Spacer()
                 }
