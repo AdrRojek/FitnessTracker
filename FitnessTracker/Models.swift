@@ -3,8 +3,8 @@ import SwiftData
 
 @Model
 final class UserProfile {
-    var weight: Double // w kg
-    var height: Double // w cm
+    var weight: Double
+    var height: Double
     var gender: Gender
     var dailyStepsGoal: Int
     
